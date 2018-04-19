@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,7 +31,13 @@ namespace Spark.Store.Mongo
         private static MongoDatabase CreateMongoDatabase(string url)
         {
             var mongourl = new MongoUrl(url);
-            var client = new MongoClient(mongourl);
+
+            //Switch to Tls12 only to be compatible with CosmosDB
+            var settings = MongoClientSettings.FromUrl(mongourl);
+            settings.SslSettings = new SslSettings();
+            settings.SslSettings.EnabledSslProtocols = SslProtocols.Tls12;
+            var client = new MongoClient(settings);
+
             return client.GetServer().GetDatabase(mongourl.DatabaseName);
         }
     }
